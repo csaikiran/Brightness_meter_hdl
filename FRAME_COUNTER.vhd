@@ -21,7 +21,7 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
+--use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -97,7 +97,7 @@ end component;
   signal V_COUNT            : std_logic_vector(10 downto 0); --Vertical pixel counter
   signal H_CENTER           : std_logic_vector(11 downto 0);
   signal V_CENTER           : std_logic_vector(10 downto 0);
---  signal EOF                : std_logic; -- End of Frame
+  signal EOF_temp           : std_logic; -- End of Frame
   signal reset              : std_logic; --inverted M_AXI_RESET
   
    signal M_AXI_TVALID_1T, M_AXI_TREADY_1T, M_AXI_TLAST_1T, CE_1T : std_logic;
@@ -147,7 +147,7 @@ ADDR_B <= V_CENTER(10 downto 6) & H_CENTER(11 downto 6);
           if (M_AXI_TLAST_1T = '1' or M_AXI_USER = '1') and M_AXI_TVALID_1T = '1' and M_AXI_TREADY_1T = '1' then
             H_COUNT <= (others => '0');
           elsif M_AXI_TVALID_1T = '1' and M_AXI_TREADY_1T = '1' then
-            H_COUNT <= H_COUNT + 2;
+            H_COUNT <= std_logic_vector(unsigned(H_COUNT) + to_unsigned(2, 12));
           end if;
       end if;
   end process ;
@@ -163,7 +163,7 @@ ADDR_B <= V_CENTER(10 downto 6) & H_CENTER(11 downto 6);
          if M_AXI_USER = '1' and CE = '1' then
             V_COUNT <= (others => '0');
           elsif M_AXI_TLAST_1T = '1' and CE_1T = '1' then
-            V_COUNT <= V_COUNT + 1;
+            V_COUNT <= std_logic_vector(unsigned(V_COUNT) + to_unsigned(1, 11));
           end if;
       end if;
   end process ;
@@ -173,7 +173,7 @@ ADDR_B <= V_CENTER(10 downto 6) & H_CENTER(11 downto 6);
        if M_AXI_RESETN = '0' then
          H_CENTER <= (others => '0');
        elsif rising_edge(M_AXI_CLK) then
-            H_CENTER <= H_COUNT(11 downto 0) - H_SIZE(11 downto 1);
+            H_CENTER <= std_logic_vector(unsigned(H_COUNT(11 downto 0)) - unsigned(H_SIZE(11 downto 1)));
        end if;
    end process ;
    
@@ -182,18 +182,22 @@ ADDR_B <= V_CENTER(10 downto 6) & H_CENTER(11 downto 6);
          if M_AXI_RESETN = '0' then
             V_CENTER <= (others => '0');
          elsif rising_edge(M_AXI_CLK) then
-            V_CENTER <= V_COUNT(10 downto 0) - V_SIZE(11 downto 1);
+            V_CENTER <= std_logic_vector(unsigned(V_COUNT(10 downto 0)) - unsigned(V_SIZE(11 downto 1)));
          end if;
      end process ;
 
  pEOF: process(M_AXI_TLAST,CE)
  begin
-    if((M_AXI_TLAST = '1') and (CE = '1') and (V_COUNT = V_SIZE-1)) then
-        EOF <= '1';
+    if(M_AXI_TLAST = '1') and (CE = '1') and (unsigned(V_COUNT) = (unsigned(V_SIZE) - to_unsigned(1, 1))) then
+        EOF_temp <= '1';
+--        EOF      <= '1';
     else
-        EOF <= '0';
+        EOF_temp <= '0';
+--        EOF      <= '0';
     end if;
  end process;
+ 
+    EOF <= EOF_temp;
  
 -- pSIZE_FAULT: process(M_AXI_TLAST,M_AXI_TVALID, M_AXI_TREADY)
 -- begin
@@ -206,7 +210,9 @@ ADDR_B <= V_CENTER(10 downto 6) & H_CENTER(11 downto 6);
      
  pSIZE_FAULT: process(M_AXI_TLAST,CE)
  begin
-    if((CE = '1') and (M_AXI_TLAST = '1') and (H_COUNT /= H_SIZE-1)) then        
+--    if((CE = '1') and (M_AXI_TLAST = '1') and (H_COUNT /= std_logic_vector(unsigned(H_SIZE)- to_unsigned(1, 12)))) 
+--    or  (EOF_temp = '1' and  (V_COUNT /= std_logic_vector(unsigned(V_SIZE)- to_unsigned(1, 12)))) then
+    if((CE = '1') and (M_AXI_TLAST = '1') and (unsigned(H_COUNT) /= (unsigned(H_SIZE)- to_unsigned(1, 12)))) then
         SIZE_FAULT <= '1';
     else
         SIZE_FAULT <= '0';
