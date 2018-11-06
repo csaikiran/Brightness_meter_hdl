@@ -38,8 +38,9 @@ architecture RTL of BRIGHTNESS_METER is
   signal MULTIPLIER_RESULT   : signed(21 downto 0); -- result after Multiplication
   signal ACCUMULATOR_TEMP    : signed(44 downto 0);
   signal ACCUMULATOR_RESULT  : signed(44 downto 0);
+  signal AVERAGE_TEMP        : std_logic_vector(44 downto 0):= (others => '0');
   signal CE_1T, CE_2T, CE_3T : std_logic;
-  signal EOF_1T, EOF_2T, EOF_3T, EOF_4T : std_logic;
+  signal EOF_1T, EOF_2T, EOF_3T, EOF_4T, EOF_5T, EOF_6T, EOF_7T : std_logic;
   
 begin
   
@@ -62,6 +63,9 @@ begin
              EOF_2T <= EOF_1T;
              EOF_3T <= EOF_2T;
              EOF_4T <= EOF_3T;
+             EOF_5T <= EOF_4T;
+             EOF_6T <= EOF_5T;
+             EOF_7T <= EOF_6T;
          end if;
     end process;
 
@@ -75,7 +79,7 @@ begin
       ADDER_RESULT <= (others => '0');
       MULTIPLIER_RESULT <= (others => '0');
     elsif rising_edge(M_AXI_CLK) then
-        if (EOF_4T = '1') then
+        if (EOF_7T = '1') then
             ACCUMULATOR_TEMP <= (others => '0');
             ACCUMULATOR_RESULT <= ACCUMULATOR_TEMP;  
         elsif CE = '1' then
@@ -92,8 +96,11 @@ begin
             ACCUMULATOR_TEMP <= ACCUMULATOR_TEMP + MULTIPLIER_RESULT;
         end if;
      end if;
-  end process ;
+  end process ; 
   
+ AVERAGE_TEMP <= std_logic_vector(shift_right(signed(ACCUMULATOR_RESULT), to_integer(unsigned(DIVIDE)))); 
+ AVERAGE <= AVERAGE_TEMP(31 downto 0);
+ 
 --pAccumulator: process (M_AXI_CLK, EOF)
 --    begin
 --      if M_AXI_RESETN = '0' then

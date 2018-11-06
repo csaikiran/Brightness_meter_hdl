@@ -26,7 +26,7 @@ height = 2048
 width = 2448
 
 # set a offset value
-offset = 0b000000001001
+offset = 0b000000010100
 #create a array for coefficients (like a bram)
 coeff = list()
 hsize = 2**6
@@ -62,7 +62,7 @@ for i in range(height):
 		
 
 
-shift = 0
+shift = 12
 deviation = deviation >> shift
 # prion operation on a display
 print("deviation : " + str(deviation))

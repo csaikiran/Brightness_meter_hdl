@@ -164,7 +164,7 @@ begin
                                  
       AVERAGE                =>  AVERAGE,      
       NEW_VALUE              =>  NEW_VALUE,    
-      SIZE_FAULT             =>  SIZE_FAULT,
+      SIZE_FAULT             =>  open,
       WEIGHTS                =>  WEIGHTS,
       EOF                    =>  EOF   
       );
@@ -190,7 +190,7 @@ begin
       RAM_DATA_I             =>  RAM_DATA_I,
       RAM_DATA_O             =>  RAM_DATA_O,
                                  
-      AVERAGE                =>  AVERAGE,      
+      AVERAGE                =>  open,      
       NEW_VALUE              =>  NEW_VALUE,    
       SIZE_FAULT             =>  SIZE_FAULT,
       CE                     =>  CE,
