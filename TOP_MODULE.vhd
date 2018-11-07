@@ -191,7 +191,7 @@ begin
       RAM_DATA_O             =>  RAM_DATA_O,
                                  
       AVERAGE                =>  open,      
-      NEW_VALUE              =>  NEW_VALUE,    
+      NEW_VALUE              =>  open,    
       SIZE_FAULT             =>  SIZE_FAULT,
       CE                     =>  CE,
       DATA_OUT_B             =>  WEIGHTS,

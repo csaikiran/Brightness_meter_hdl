@@ -31,6 +31,10 @@ end entity;
 
 architecture RTL of BRIGHTNESS_METER is
 
+  type t_FSM is (IDLE, SHIFT, NEW_IMAGE);
+  
+  signal fsm_state : t_FSM;
+  signal shift_cnt : unsigned(3 downto 0);
   signal CE                  : std_logic; -- AND of M_AXI_CEN, M_AXI_TVALID and M_AXI_TREADY
   signal SUBTRACT_RESULT_0   : signed(12 downto 0); -- result after subtraction for pixel #0
   signal SUBTRACT_RESULT_1   : signed(12 downto 0); -- result after subtraction for pixel #1
@@ -40,9 +44,45 @@ architecture RTL of BRIGHTNESS_METER is
   signal ACCUMULATOR_RESULT  : signed(44 downto 0);
   signal AVERAGE_TEMP        : std_logic_vector(44 downto 0):= (others => '0');
   signal CE_1T, CE_2T, CE_3T : std_logic;
-  signal EOF_1T, EOF_2T, EOF_3T, EOF_4T, EOF_5T, EOF_6T, EOF_7T : std_logic;
+  signal EOF_1T, EOF_2T, EOF_3T, EOF_4T, EOF_5T, EOF_6T, EOF_7T, EOF_8T : std_logic;
   
 begin
+  
+  process(M_AXI_CLK, M_AXI_RESETN)
+  begin
+    if M_AXI_RESETN = '0' then
+        fsm_state <= IDLE;
+        shift_cnt <= (others => '0');
+        AVERAGE_TEMP <= (others => '0');
+        AVERAGE <= (others => '0');
+        NEW_VALUE <= '0';
+    elsif rising_edge(M_AXI_CLK) then
+        case fsm_state is
+            when IDLE =>
+                NEW_VALUE <= '0';
+                if EOF_8T = '1' then
+                    AVERAGE_TEMP <= std_logic_vector(ACCUMULATOR_RESULT);
+                    shift_cnt <= unsigned(DIVIDE);
+                    fsm_state <= SHIFT;
+                end if;
+            when SHIFT => 
+                if shift_cnt = 0 then
+                    fsm_state <= NEW_IMAGE;
+                else
+                    shift_cnt <= shift_cnt - 1;
+                    AVERAGE_TEMP <= AVERAGE_TEMP(44) & AVERAGE_TEMP(44 downto 1);
+                end if;
+            when NEW_IMAGE =>
+                AVERAGE <= AVERAGE_TEMP(31 downto 0);
+                NEW_VALUE <= '1';
+                fsm_state <= IDLE;
+            when others =>
+                fsm_state <= IDLE;
+                NEW_VALUE <= '0';
+        end case;
+    end if;
+  end process;
+  
   
   -- Make clock enable to simplify code afterwards
   CE  <= M_AXI_CEN and M_AXI_TVALID and M_AXI_TREADY;
@@ -66,6 +106,7 @@ begin
              EOF_5T <= EOF_4T;
              EOF_6T <= EOF_5T;
              EOF_7T <= EOF_6T;
+             EOF_8T <= EOF_7T;
          end if;
     end process;
 
@@ -98,8 +139,8 @@ begin
      end if;
   end process ; 
   
- AVERAGE_TEMP <= std_logic_vector(shift_right(signed(ACCUMULATOR_RESULT), to_integer(unsigned(DIVIDE)))); 
- AVERAGE <= AVERAGE_TEMP(31 downto 0);
+-- AVERAGE_TEMP <= std_logic_vector(shift_right(signed(ACCUMULATOR_RESULT), to_integer(unsigned(DIVIDE)))); 
+-- AVERAGE <= AVERAGE_TEMP(31 downto 0);
  
 --pAccumulator: process (M_AXI_CLK, EOF)
 --    begin
