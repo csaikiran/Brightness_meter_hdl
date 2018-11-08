@@ -1,10 +1,6 @@
--- 
---
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-
 
 entity BRIGHTNESS_METER is
   port (
@@ -23,7 +19,6 @@ entity BRIGHTNESS_METER is
    
     AVERAGE        : out std_logic_vector(31 downto 0);
     NEW_VALUE      : out std_logic;
-    SIZE_FAULT     : out std_logic;
     WEIGHTS        : in  std_logic_vector(7 downto 0);
     EOF            : in  std_logic
   );

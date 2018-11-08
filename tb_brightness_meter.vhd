@@ -135,7 +135,7 @@ I_TOP_MODULE : TOP_MODULE
     M_AXI_USER     => M_AXI_USER,--: in std_logic;                     -- Start Of Frame
     M_AXI_TLAST    => M_AXI_TLAST,--: in std_logic;                     -- End Of Line
     -- Autoreg
-    DIVIDE         => "1100",--: in  std_logic_vector(3 downto 0);
+    DIVIDE         => "1000",--: in  std_logic_vector(3 downto 0);
     H_SIZE         => std_logic_vector(to_unsigned(2448, 12)),--: in  std_logic_vector(11 downto 0);
     V_SIZE         => std_logic_vector(to_unsigned(2048, 12)),--: in  std_logic_vector(12 downto 0);
     REF_VALUE      => "000000010100" ,--: in  std_logic_vector(11 downto 0);

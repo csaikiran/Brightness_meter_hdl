@@ -52,8 +52,6 @@ entity FRAME_COUNTER is
     RAM_DATA_I                     : in  std_logic_vector(7 downto 0);
     RAM_DATA_O                     : out std_logic_vector(7 downto 0);
     
-    AVERAGE                        : out std_logic_vector(31 downto 0);
-    NEW_VALUE                      : out std_logic;
     SIZE_FAULT                     : out std_logic;
     CE                             : in  std_logic;
     DATA_OUT_B                     : out std_logic_vector(7 downto 0);
@@ -188,7 +186,7 @@ ADDR_B <= V_CENTER(10 downto 6) & H_CENTER(11 downto 6);
 
  pEOF: process(M_AXI_TLAST,CE)
  begin
-    if(M_AXI_TLAST = '1') and (CE = '1') and (unsigned(V_COUNT) = (unsigned(V_SIZE) - to_unsigned(1, 1))) then
+    if(M_AXI_TLAST = '1') and (CE = '1') and (unsigned(V_COUNT) = (unsigned(V_SIZE) - to_unsigned(1, 12))) then
         EOF_temp <= '1';
 --        EOF      <= '1';
     else
@@ -215,7 +213,7 @@ ADDR_B <= V_CENTER(10 downto 6) & H_CENTER(11 downto 6);
     elsif rising_edge(M_AXI_CLK) then
         if((CE = '1') and (M_AXI_TLAST = '1') and (unsigned(H_COUNT) /= (unsigned(H_SIZE)- to_unsigned(4, 12)))) 
         or  (EOF_temp = '1' and  (unsigned(V_COUNT) /= (unsigned(V_SIZE)- to_unsigned(1, 12)))) then
-    --    if((CE = '1') and (M_AXI_TLAST = '1') and (unsigned(H_COUNT) /= (unsigned(H_SIZE)- to_unsigned(1, 12)))) then
+    --    if((CE = '1') and (M_AXI_TLAST = '1') and (unsigned(H_COUNT) /= (unsigned(H_SIZE)- to_unsigned(4, 12)))) then
             SIZE_FAULT <= '1';
         else
             SIZE_FAULT <= '0';

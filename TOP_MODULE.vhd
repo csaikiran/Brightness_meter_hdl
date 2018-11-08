@@ -79,7 +79,6 @@ component BRIGHTNESS_METER
  
   AVERAGE        : out std_logic_vector(31 downto 0);
   NEW_VALUE      : out std_logic;
-  SIZE_FAULT     : out std_logic;
   WEIGHTS        : in  std_logic_vector(7 downto 0);
   EOF            : in  std_logic
   );
@@ -105,8 +104,6 @@ component FRAME_COUNTER
   RAM_DATA_I                     : in  std_logic_vector(7 downto 0);
   RAM_DATA_O                     : out std_logic_vector(7 downto 0);
  
-  AVERAGE                        : out std_logic_vector(31 downto 0);
-  NEW_VALUE                      : out std_logic;
   SIZE_FAULT                     : out std_logic;
   CE                             : in  std_logic;
   DATA_OUT_B                     : out std_logic_vector(7 downto 0);
@@ -164,7 +161,6 @@ begin
                                  
       AVERAGE                =>  AVERAGE,      
       NEW_VALUE              =>  NEW_VALUE,    
-      SIZE_FAULT             =>  open,
       WEIGHTS                =>  WEIGHTS,
       EOF                    =>  EOF   
       );
@@ -190,8 +186,6 @@ begin
       RAM_DATA_I             =>  RAM_DATA_I,
       RAM_DATA_O             =>  RAM_DATA_O,
                                  
-      AVERAGE                =>  open,      
-      NEW_VALUE              =>  open,    
       SIZE_FAULT             =>  SIZE_FAULT,
       CE                     =>  CE,
       DATA_OUT_B             =>  WEIGHTS,
