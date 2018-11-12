@@ -91,8 +91,8 @@ end component;
 
 
   signal ADDR_B             : std_logic_vector(10 downto 0);
-  signal H_COUNT            : std_logic_vector(11 downto 0); --Horizantal pixel counter
-  signal V_COUNT            : std_logic_vector(10 downto 0); --Vertical pixel counter
+  signal H_COUNT            : unsigned(11 downto 0); --Horizantal pixel counter
+  signal V_COUNT            : unsigned(10 downto 0); --Vertical pixel counter
   signal H_CENTER           : std_logic_vector(11 downto 0);
   signal V_CENTER           : std_logic_vector(10 downto 0);
   signal EOF_temp           : std_logic := '0'; -- End of Frame
@@ -145,7 +145,7 @@ ADDR_B <= V_CENTER(10 downto 6) & H_CENTER(11 downto 6);
           if (M_AXI_TLAST_1T = '1' or M_AXI_USER = '1') and M_AXI_TVALID_1T = '1' and M_AXI_TREADY_1T = '1' then
             H_COUNT <= (others => '0');
           elsif M_AXI_TVALID_1T = '1' and M_AXI_TREADY_1T = '1' then
-            H_COUNT <= std_logic_vector(unsigned(H_COUNT) + to_unsigned(2, 12));
+            H_COUNT <= unsigned(H_COUNT) + 2;
           end if;
       end if;
   end process ;
@@ -161,7 +161,7 @@ ADDR_B <= V_CENTER(10 downto 6) & H_CENTER(11 downto 6);
          if M_AXI_USER = '1' and CE = '1' then
             V_COUNT <= (others => '0');
           elsif M_AXI_TLAST_1T = '1' and CE_1T = '1' then
-            V_COUNT <= std_logic_vector(unsigned(V_COUNT) + to_unsigned(1, 11));
+            V_COUNT <= unsigned(V_COUNT) + 1;
           end if;
       end if;
   end process ;
@@ -180,13 +180,13 @@ ADDR_B <= V_CENTER(10 downto 6) & H_CENTER(11 downto 6);
          if M_AXI_RESETN = '0' then
             V_CENTER <= (others => '0');
          elsif rising_edge(M_AXI_CLK) then
-            V_CENTER <= std_logic_vector(unsigned(V_COUNT(10 downto 0)) - unsigned(V_SIZE(11 downto 1)));
+            V_CENTER <= std_logic_vector(V_COUNT(10 downto 0) - unsigned(V_SIZE(11 downto 1)));
          end if;
      end process ;
 
  pEOF: process(M_AXI_TLAST,CE)
  begin
-    if(M_AXI_TLAST = '1') and (CE = '1') and (unsigned(V_COUNT) = (unsigned(V_SIZE) - to_unsigned(1, 12))) then
+    if(M_AXI_TLAST = '1') and (CE = '1') and (V_COUNT) = (unsigned(V_SIZE) - 1) then
         EOF_temp <= '1';
 --        EOF      <= '1';
     else
@@ -211,8 +211,8 @@ ADDR_B <= V_CENTER(10 downto 6) & H_CENTER(11 downto 6);
     if M_AXI_RESETN = '0' then
         SIZE_FAULT <= '0';
     elsif rising_edge(M_AXI_CLK) then
-        if((CE = '1') and (M_AXI_TLAST = '1') and (unsigned(H_COUNT) /= (unsigned(H_SIZE)- to_unsigned(4, 12)))) 
-        or  (EOF_temp = '1' and  (unsigned(V_COUNT) /= (unsigned(V_SIZE)- to_unsigned(1, 12)))) then
+        if((CE = '1') and (M_AXI_TLAST = '1') and ((H_COUNT) /= (unsigned(H_SIZE)- to_unsigned(4, 12)))) 
+        or  (EOF_temp = '1' and  ((V_COUNT) /= (unsigned(V_SIZE)- to_unsigned(1, 12)))) then
     --    if((CE = '1') and (M_AXI_TLAST = '1') and (unsigned(H_COUNT) /= (unsigned(H_SIZE)- to_unsigned(4, 12)))) then
             SIZE_FAULT <= '1';
         else
