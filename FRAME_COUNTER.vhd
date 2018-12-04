@@ -223,7 +223,9 @@ EOF <= EOF_temp;
 --       SIZE_FAULT <= '0';
 --   els
    if rising_edge(S_AXI_CLK) then
-       if((CE = '1') and (S_AXI_TLAST = '1') and (unsigned(H_COUNT) /= (unsigned(H_SIZE)- to_unsigned(4, 12)))) 
+--       if((CE = '1') and (S_AXI_TLAST = '1') and (unsigned(H_COUNT) /= (unsigned(H_SIZE)- to_unsigned(4, 12)))) 
+--            or  (EOF_temp = '1' and  (unsigned(V_COUNT) /= (unsigned(V_SIZE)- to_unsigned(1, 12)))) then
+       if((CE_1T = '1') and (S_AXI_TLAST_1T = '1') and (unsigned(H_COUNT) /= (unsigned(H_SIZE)- to_unsigned(2, 12)))) 
             or  (EOF_temp = '1' and  (unsigned(V_COUNT) /= (unsigned(V_SIZE)- to_unsigned(1, 12)))) then
    --    if((CE = '1') and (S_AXI_TLAST = '1') and (unsigned(H_COUNT) /= (unsigned(H_SIZE)- to_unsigned(4, 12)))) then
            SIZE_FAULT <= '1';

@@ -106,6 +106,7 @@ S_AXI_CLK <= NOT S_AXI_CLK AFTER 3.367 NS;
       for i in 0 to 2047 loop
           if i = 0 then
               S_AXI_USER <= '1';
+--              S_AXI_TVALID <= '0';
           end if;
           for j in 0 to 2448/2 - 1 loop
               S_AXI_TVALID <= '1';
@@ -119,6 +120,7 @@ S_AXI_CLK <= NOT S_AXI_CLK AFTER 3.367 NS;
               S_AXI_TVALID <= '0';
               S_AXI_TREADY <= '0';
               S_AXI_USER <= '0';
+              wait until rising_edge(S_AXI_CLK);
           end loop;
           wait until rising_edge(S_AXI_CLK);
       end loop;
