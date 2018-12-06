@@ -73,7 +73,7 @@ end component;
   signal S_AXI_TDATA_1T, S_AXI_TDATA_2T, S_AXI_TDATA_3T, S_AXI_TDATA_4T, S_AXI_TDATA_5T, S_AXI_TDATA_6T : std_logic_vector(23 downto 0); --Delayed input data 
   signal SUBTRACT_RESULT_0                                                                              : signed(12 downto 0):= (others => '0'); -- result after subtraction for pixel #0
   signal SUBTRACT_RESULT_1                                                                              : signed(12 downto 0):= (others => '0'); -- result after subtraction for pixel #1
-  signal ADDER_RESULT                                                                                   : signed(13 downto 0):= (others => '0'); -- result after addition for pixel #0 and pixel #1
+  signal ADDER_RESULT, ADDER_RESULT_1T, ADDER_RESULT_2T, ADDER_RESULT_3T                                : signed(13 downto 0):= (others => '0'); -- result after addition for pixel #0 and pixel #1
   signal MULTIPLIER_RESULT                                                                              : signed(21 downto 0):= (others => '0'); -- result after Multiplication
   signal ACCUMULATOR_TEMP                                                                               : signed(44 downto 0):= (others => '0');  -- Temporary storage for Accumulatorn
   signal ACCUMULATOR_RESULT                                                                             : signed(44 downto 0):= (others => '0');  -- result after Accumulator
@@ -145,18 +145,18 @@ begin
 --        MULTIPLIER_RESULT <= (others => '0');
 --    els
     if rising_edge(S_AXI_CLK) then
+        SUBTRACT_RESULT_0 <= signed('0' & S_AXI_TDATA(11 downto 0)) - signed('0' & REF_VALUE);
+        SUBTRACT_RESULT_1 <= signed('0' & S_AXI_TDATA(23 downto 12)) - signed('0' & REF_VALUE);
+        ADDER_RESULT <= (SUBTRACT_RESULT_0(12) & SUBTRACT_RESULT_0) + SUBTRACT_RESULT_1;
+        ADDER_RESULT_1T <= ADDER_RESULT;
+        ADDER_RESULT_2T <= ADDER_RESULT_1T;
+        ADDER_RESULT_3T <= ADDER_RESULT_2T;
         if (EOF_7T = '1') then
             ACCUMULATOR_TEMP <= (others => '0');
-            ACCUMULATOR_RESULT <= ACCUMULATOR_TEMP;  
-        elsif CE = '1' then
-            SUBTRACT_RESULT_0 <= signed('0' & S_AXI_TDATA_3T(11 downto 0)) - signed('0' & REF_VALUE);
-            SUBTRACT_RESULT_1 <= signed('0' & S_AXI_TDATA_3T(23 downto 12)) - signed('0' & REF_VALUE);
-        end if;
-        if CE_1T = '1' then
-            ADDER_RESULT <= (SUBTRACT_RESULT_0(12) & SUBTRACT_RESULT_0) + SUBTRACT_RESULT_1;
+            ACCUMULATOR_RESULT <= ACCUMULATOR_TEMP;
         end if;
         if CE_2T = '1' then
-            MULTIPLIER_RESULT <= signed(ADDER_RESULT) * signed(WEIGHTS);
+            MULTIPLIER_RESULT <= signed(ADDER_RESULT_3T) * signed(WEIGHTS);
         end if;
         if CE_3T = '1' then
             ACCUMULATOR_TEMP <= ACCUMULATOR_TEMP + MULTIPLIER_RESULT;

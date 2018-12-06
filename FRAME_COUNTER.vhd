@@ -145,7 +145,9 @@ ADDR_B <= std_logic_vector(V_CENTER(10 downto 6) & H_CENTER(11 downto 6));
             S_AXI_TREADY_1T <= S_AXI_TREADY;
             S_AXI_TLAST_1T <= S_AXI_TLAST;
 --         if (S_AXI_TLAST_1T = '1' or S_AXI_USER_1T = '1') and CE_1T = '1' then
-          if (S_AXI_TLAST_1T = '1' and CE_1T = '1') or (S_AXI_USER = '1' and CE = '1') then
+          if (S_AXI_USER_1T = '1' and CE_1T = '1') then
+            H_COUNT <= "000000000010";
+          elsif (S_AXI_TLAST_1T = '1' and CE_1T = '1') then
             H_COUNT <= (others => '0');
 --         elsif S_AXI_TVALID_1T = '1' and S_AXI_TREADY_1T = '1' then
          elsif CE_1T = '1' then
@@ -163,7 +165,7 @@ ADDR_B <= std_logic_vector(V_CENTER(10 downto 6) & H_CENTER(11 downto 6));
 --      elsif rising_edge(S_AXI_CLK) then
         if rising_edge(S_AXI_CLK) then
             CE_1T <= CE;
-         if S_AXI_USER = '1' and CE = '1' then
+         if S_AXI_USER_1T = '1' and CE_1T = '1' then
             V_COUNT <= (others => '0');
           elsif S_AXI_TLAST_1T = '1' and CE_1T = '1' then
             V_COUNT <= unsigned(V_COUNT) + 1;
@@ -195,9 +197,9 @@ ADDR_B <= std_logic_vector(V_CENTER(10 downto 6) & H_CENTER(11 downto 6));
          end if;
      end process ;
 
- pEOF: process(S_AXI_TLAST,CE)
+ pEOF: process(S_AXI_TLAST_1T,CE_1T)
      begin
-        if(S_AXI_TLAST = '1') and (CE = '1') and (unsigned(V_COUNT) = (unsigned(V_SIZE) - to_unsigned(1, 12))) then
+        if(S_AXI_TLAST_1T = '1') and (CE_1T = '1') and (unsigned(V_COUNT) = (unsigned(V_SIZE) - to_unsigned(1, 12))) then
             EOF_temp <= '1';
     --        EOF      <= '1';
         else

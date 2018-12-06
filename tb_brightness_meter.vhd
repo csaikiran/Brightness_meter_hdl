@@ -81,6 +81,7 @@ S_AXI_CLK <= NOT S_AXI_CLK AFTER 3.367 NS;
 
   -- Make an incrementing value to be used as pixel data
   pMAINSTIMULUS: process
+  variable delay : integer := 0;
   begin
       RAM_DATAWe <= '0';
 --      RAM_MEMENB <= '0';
@@ -108,6 +109,7 @@ S_AXI_CLK <= NOT S_AXI_CLK AFTER 3.367 NS;
               S_AXI_USER <= '1';
 --              S_AXI_TVALID <= '0';
           end if;
+          delay := 0;
           for j in 0 to 2448/2 - 1 loop
               S_AXI_TVALID <= '1';
               S_AXI_TREADY <= '1';
@@ -117,10 +119,17 @@ S_AXI_CLK <= NOT S_AXI_CLK AFTER 3.367 NS;
               S_AXI_TDATA_LSB <= to_unsigned(i + j, 12);
               wait until rising_edge(S_AXI_CLK);
               S_AXI_TLAST <= '0';
-              S_AXI_TVALID <= '0';
-              S_AXI_TREADY <= '0';
               S_AXI_USER <= '0';
-              wait until rising_edge(S_AXI_CLK);
+              if delay >= 7 then
+                  for i in 0 to 9 loop
+                    S_AXI_TVALID <= '0';
+                    S_AXI_TREADY <= '0';
+                      wait until rising_edge(S_AXI_CLK);
+                  end loop;
+                  delay := 0;
+              else
+                delay := delay + 1;
+              end if;
           end loop;
           wait until rising_edge(S_AXI_CLK);
       end loop;
